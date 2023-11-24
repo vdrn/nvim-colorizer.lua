@@ -11,7 +11,7 @@ local CSS_RGB_FN_MINIMUM_LENGTH = #"rgb(0,0,0)" - 1
 ---@param opts table: Values passed from matchers like prefix
 ---@return number|nil: Index of line where the rgb/rgba function ended
 ---@return string|nil: rgb hex value
-function parser.rgb_function_parser(line, i, opts)
+function parser.rgb_function_parser(line, i, opts, multiply_by_alpha)
   local min_len = CSS_RGBA_FN_MINIMUM_LENGTH
   local min_commas, min_spaces, min_percent = 2, 2, 3
   local pattern = "^"
@@ -107,7 +107,13 @@ function parser.rgb_function_parser(line, i, opts)
     end
   end
 
-  local rgb_hex = string.format("%02x%02x%02x", r * a, g * a, b * a)
+
+  local rgb_hex
+  if multiply_by_alpha then
+    rgb_hex = string.format("%02x%02x%02x", r * a, g * a, b * a)
+  else
+    rgb_hex = string.format("%02x%02x%02x", r , g , b )
+  end
   return match_end - 1, rgb_hex
 end
 

@@ -29,7 +29,7 @@ local matcher = {}
 ---@param matchers table: List of prefixes, {"rgb", "hsl"}
 ---@param matchers_trie table: Table containing information regarding non-trie based parsers
 ---@return function: function which will just parse the line for enabled parsers
-function matcher.compile(matchers, matchers_trie)
+function matcher.compile(matchers, matchers_trie, multiply_by_alpha )
   local trie = Trie(matchers_trie)
 
   local function parse_fn(line, i, buf)
@@ -52,7 +52,7 @@ function matcher.compile(matchers, matchers_trie)
     if prefix then
       local fn = "_" .. prefix
       if parser[fn] then
-        return parser[fn](line, i, matchers[prefix])
+        return parser[fn](line, i, matchers[prefix], multiply_by_alpha)
       end
     end
 
@@ -156,7 +156,7 @@ function matcher.make(options)
     matchers[value] = { prefix = value }
   end
 
-  loop_parse_fn = matcher.compile(matchers, matchers_prefix)
+  loop_parse_fn = matcher.compile(matchers, matchers_prefix, options.multiply_by_alpha)
   MATCHER_CACHE[matcher_key] = loop_parse_fn
 
   return loop_parse_fn

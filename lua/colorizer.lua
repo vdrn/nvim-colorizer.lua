@@ -173,6 +173,7 @@ local USER_DEFAULT_OPTIONS = {
   sass = { enable = false, parsers = { css = true } },
   virtualtext = "■",
   always_update = false,
+  multiply_by_alpha = true
 }
 
 local OPTIONS = { buf = {}, file = {} }

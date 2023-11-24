@@ -17,7 +17,7 @@ local parser = {}
 ---@param opts table: Containing minlen, maxlen, valid_lengths
 ---@return number|nil: index of line where the hex value ended
 ---@return string|nil: rgb hex value
-function parser.rgba_hex_parser(line, i, opts)
+function parser.rgba_hex_parser(line, i, opts, multiply_by_alpha)
   local minlen, maxlen, valid_lengths = opts.minlen, opts.maxlen, opts.valid_lengths
   local j = i + 1
   if #line < j + minlen - 1 then
@@ -55,7 +55,12 @@ function parser.rgba_hex_parser(line, i, opts)
   end
 
   if alpha then
-    alpha = tonumber(alpha) / 255
+    if multiply_by_alpha then
+      alpha = tonumber(alpha) / 255
+    else
+      alpha = 1.0
+    end
+
     local r = floor(band(rshift(v, 16), 0xFF) * alpha)
     local g = floor(band(rshift(v, 8), 0xFF) * alpha)
     local b = floor(band(v, 0xFF) * alpha)
