@@ -164,6 +164,8 @@ local USER_DEFAULT_OPTIONS = {
   names = true,
   RRGGBBAA = false,
   AARRGGBB = false,
+  mq_u8=true,
+  mq=true,
   rgb_fn = false,
   hsl_fn = false,
   css = false,
@@ -202,7 +204,7 @@ end
 ---@return table
 local function parse_buffer_options(options)
   local includes = {
-    ["css"] = { "names", "RGB", "RRGGBB", "RRGGBBAA", "hsl_fn", "rgb_fn" },
+    ["css"] = { "names", "RGB","RRGGBB", "RRGGBBAA", "hsl_fn", "rgb_fn" },
     ["css_fn"] = { "hsl_fn", "rgb_fn" },
   }
   local default_opts = USER_DEFAULT_OPTIONS

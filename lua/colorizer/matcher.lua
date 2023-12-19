@@ -6,6 +6,7 @@ local min, max = math.min, math.max
 local color_name_parser = require "colorizer.parser.names"
 
 local rgb_function_parser = require "colorizer.parser.rgb"
+local rgb_float_parser = require "colorizer.parser.rgb_float"
 local hsl_function_parser = require "colorizer.parser.hsl"
 
 local argb_hex_parser = require "colorizer.parser.argb_hex"
@@ -21,6 +22,8 @@ local parser = {
   ["_rgba"] = rgb_function_parser,
   ["_hsl"] = hsl_function_parser,
   ["_hsla"] = hsl_function_parser,
+  ["_color_u8!"] = rgb_function_parser,
+  ["_Color::new"] = rgb_float_parser,
 }
 
 local matcher = {}
@@ -29,7 +32,7 @@ local matcher = {}
 ---@param matchers table: List of prefixes, {"rgb", "hsl"}
 ---@param matchers_trie table: Table containing information regarding non-trie based parsers
 ---@return function: function which will just parse the line for enabled parsers
-function matcher.compile(matchers, matchers_trie, multiply_by_alpha )
+function matcher.compile(matchers, matchers_trie, multiply_by_alpha)
   local trie = Trie(matchers_trie)
 
   local function parse_fn(line, i, buf)
@@ -84,19 +87,23 @@ function matcher.make(options)
   local enable_AARRGGBB = options.AARRGGBB
   local enable_rgb = options.rgb_fn
   local enable_hsl = options.hsl_fn
+  local enable_mq_u8 = options.mq_u8;
+  local enable_mq= options.mq;
 
   local matcher_key = 0
-    + (enable_names and 1 or 0)
-    + (enable_RGB and 1 or 1)
-    + (enable_RRGGBB and 1 or 2)
-    + (enable_RRGGBBAA and 1 or 3)
-    + (enable_AARRGGBB and 1 or 4)
-    + (enable_rgb and 1 or 5)
-    + (enable_hsl and 1 or 6)
-    + ((enable_tailwind == true or enable_tailwind == "normal") and 1 or 7)
-    + (enable_tailwind == "lsp" and 1 or 8)
-    + (enable_tailwind == "both" and 1 or 9)
-    + (enable_sass and 1 or 10)
+      + (enable_names and 1 or 0)
+      + (enable_RGB and 1 or 1)
+      + (enable_RRGGBB and 1 or 2)
+      + (enable_RRGGBBAA and 1 or 3)
+      + (enable_AARRGGBB and 1 or 4)
+      + (enable_rgb and 1 or 5)
+      + (enable_hsl and 1 or 6)
+      + ((enable_tailwind == true or enable_tailwind == "normal") and 1 or 7)
+      + (enable_tailwind == "lsp" and 1 or 8)
+      + (enable_tailwind == "both" and 1 or 9)
+      + (enable_sass and 1 or 10)
+      + (enable_mq_u8 and 1 or 11)
+      + (enable_mq and 1 or 12)
 
   if matcher_key == 0 then
     return false
@@ -150,6 +157,12 @@ function matcher.make(options)
   elseif enable_hsl then
     table.insert(matchers_prefix, "hsla")
     table.insert(matchers_prefix, "hsl")
+  end
+  if enable_mq_u8 then
+    table.insert(matchers_prefix, "color_u8!")
+  end
+  if enable_mq then
+    table.insert(matchers_prefix, "Color::new")
   end
 
   for _, value in ipairs(matchers_prefix) do

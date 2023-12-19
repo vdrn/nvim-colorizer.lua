@@ -21,7 +21,7 @@ local ffi = require "ffi"
 ffi.cdef [[
 struct Trie {
 	bool is_leaf;
-	struct Trie* character[62];
+	struct Trie* character[65];
 };
 void *malloc(size_t size);
 void free(void *ptr);
@@ -41,7 +41,7 @@ local function trie_destroy(trie)
   if trie == nil then
     return
   end
-  for i = 0, 61 do
+  for i = 0, 64 do
     local child = trie.character[i]
     if child ~= nil then
       trie_destroy(child)
@@ -52,20 +52,26 @@ end
 
 local total_char = 255
 local INDEX_LOOKUP_TABLE = ffi.new("uint8_t[?]", total_char)
-local CHAR_LOOKUP_TABLE = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
+local CHAR_LOOKUP_TABLE = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!:_-"
 do
   local b = string.byte
   local extra_char = {
     [b "-"] = true,
   }
-  local byte = { ["0"] = b "0", ["9"] = b "9", ["a"] = b "a", ["A"] = b "A", ["z"] = b "z", ["Z"] = b "Z" }
+  local byte = { ["0"] = b "0", ["9"] = b "9", ["a"] = b "a", ["A"] = b "A", ["z"] = b "z", ["Z"] = b "Z" , ["!"] = b "!", [":"] = b":", ["_"]= b"_"}
   for i = 0, total_char do
     if i >= byte["0"] and i <= byte["9"] then
       INDEX_LOOKUP_TABLE[i] = i - byte["0"]
     elseif i >= byte["A"] and i <= byte["Z"] then
-      INDEX_LOOKUP_TABLE[i] = i - byte["A"] + 10
+      INDEX_LOOKUP_TABLE[i] = i - byte["A"]  + 10
     elseif i >= byte["a"] and i <= byte["z"] then
-      INDEX_LOOKUP_TABLE[i] = i - byte["a"] + 10 + 26
+      INDEX_LOOKUP_TABLE[i] = i - byte["a"]  + 10 + 26
+    elseif i == byte["!"] then
+      INDEX_LOOKUP_TABLE[i] = 10 + 26 + 26
+    elseif i == byte[":"] then
+      INDEX_LOOKUP_TABLE[i] = 10 + 26 + 26 + 1
+    elseif i == byte["_"] then
+      INDEX_LOOKUP_TABLE[i] = 10 + 26 + 26 + 1 + 1
     elseif extra_char[i] then
     else
       INDEX_LOOKUP_TABLE[i] = total_char
@@ -156,7 +162,7 @@ end
 --- Printing utilities
 
 local function index_to_char(index)
-  if index < 0 or index > 61 then
+  if index < 0 or index > 64 then
     return
   end
   return CHAR_LOOKUP_TABLE:sub(index + 1, index + 1)
@@ -167,7 +173,7 @@ local function trie_as_table(trie)
     return nil
   end
   local children = {}
-  for i = 0, 61 do
+  for i = 0, 64 do
     local child = trie.character[i]
     if child ~= nil then
       local child_table = trie_as_table(child)
