@@ -76,6 +76,7 @@ do
     else
       INDEX_LOOKUP_TABLE[i] = total_char
     end
+
   end
 end
 

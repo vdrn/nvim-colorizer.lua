@@ -7,6 +7,7 @@ local color_name_parser = require "colorizer.parser.names"
 
 local rgb_function_parser = require "colorizer.parser.rgb"
 local rgb_float_parser = require "colorizer.parser.rgb_float"
+local rgb_function_hex_parser = require "colorizer.parser.rgb_fn_hex"
 local hsl_function_parser = require "colorizer.parser.hsl"
 
 local argb_hex_parser = require "colorizer.parser.argb_hex"
@@ -23,6 +24,7 @@ local parser = {
   ["_hsl"] = hsl_function_parser,
   ["_hsla"] = hsl_function_parser,
   ["_color_u8!"] = rgb_function_parser,
+  ["_color_u8_hex!"] = rgb_function_hex_parser,
   ["_Color::new"] = rgb_float_parser,
 }
 
@@ -88,6 +90,7 @@ function matcher.make(options)
   local enable_rgb = options.rgb_fn
   local enable_hsl = options.hsl_fn
   local enable_mq_u8 = options.mq_u8;
+  local enable_mq_u8_hex = options.mq_u8_hex;
   local enable_mq= options.mq;
 
   local matcher_key = 0
@@ -103,7 +106,8 @@ function matcher.make(options)
       + (enable_tailwind == "both" and 1 or 9)
       + (enable_sass and 1 or 10)
       + (enable_mq_u8 and 1 or 11)
-      + (enable_mq and 1 or 12)
+      + (enable_mq_u8_hex and 1 or 12)
+      + (enable_mq and 1 or 13)
 
   if matcher_key == 0 then
     return false
@@ -126,7 +130,7 @@ function matcher.make(options)
     matchers.sass_name_parser = true
   end
 
-  local valid_lengths = { [3] = enable_RGB, [6] = enable_RRGGBB, [8] = enable_RRGGBBAA }
+  local valid_lengths = { [3] = enable_RGB, [6] = enable_RRGGBB, [8] = enable_RRGGBBAA or enable_mq_u8_hex }
   local minlen, maxlen
   for k, v in pairs(valid_lengths) do
     if v then
@@ -160,6 +164,9 @@ function matcher.make(options)
   end
   if enable_mq_u8 then
     table.insert(matchers_prefix, "color_u8!")
+  end
+  if enable_mq_u8_hex then
+    table.insert(matchers_prefix, "color_u8_hex!")
   end
   if enable_mq then
     table.insert(matchers_prefix, "Color::new")
