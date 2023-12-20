@@ -26,6 +26,7 @@ local parser = {
   ["_color_u8!"] = rgb_function_parser,
   ["_color_u8_hex!"] = rgb_function_hex_parser,
   ["_Color::new"] = rgb_float_parser,
+  ["_vec4"] = rgb_float_parser,
 }
 
 local matcher = {}
@@ -91,6 +92,7 @@ function matcher.make(options)
   local enable_hsl = options.hsl_fn
   local enable_mq_u8 = options.mq_u8;
   local enable_mq_u8_hex = options.mq_u8_hex;
+  local enable_glsl= options.glsl;
   local enable_mq= options.mq;
 
   local matcher_key = 0
@@ -108,6 +110,7 @@ function matcher.make(options)
       + (enable_mq_u8 and 1 or 11)
       + (enable_mq_u8_hex and 1 or 12)
       + (enable_mq and 1 or 13)
+      + (enable_glsl and 1 or 14)
 
   if matcher_key == 0 then
     return false
@@ -170,6 +173,9 @@ function matcher.make(options)
   end
   if enable_mq then
     table.insert(matchers_prefix, "Color::new")
+  end
+  if enable_glsl then
+    table.insert(matchers_prefix, "vec4")
   end
 
   for _, value in ipairs(matchers_prefix) do

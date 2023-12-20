@@ -167,6 +167,7 @@ local USER_DEFAULT_OPTIONS = {
   mq_u8=false,
   mq_u8_hex=false,
   mq=false,
+  glsl=false,
   rgb_fn = false,
   hsl_fn = false,
   css = false,
